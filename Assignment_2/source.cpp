@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -45,9 +47,15 @@ int main() {
 
     vector<STUDENT_DATA> students = readStudentData(filename);
 
+    // Debug mode: Print all the student data if compiled with the DEBUG flag
+#ifdef DEBUG
+    cout << "Debug Mode: Printing student data..." << endl;
     for (const auto& student : students) {
         cout << "First Name: " << student.first_name << ", Last Name: " << student.last_name << endl;
     }
+#endif
+
+    cout << "Student data loaded successfully." << endl;
 
     return 0;
 }
