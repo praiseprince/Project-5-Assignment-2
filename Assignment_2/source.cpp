@@ -9,10 +9,11 @@ using namespace std;
 struct STUDENT_DATA {
     string first_name;
     string last_name;
+    string email;
 };
 
 // Function to read student data from file and return a vector of STUDENT_DATA objects
-vector<STUDENT_DATA> readStudentData(const string& filename) {
+vector<STUDENT_DATA> readStudentData(const string& filename, bool includeEmails = false) {
     vector<STUDENT_DATA> students;
     ifstream infile(filename);
     string line;
@@ -24,15 +25,29 @@ vector<STUDENT_DATA> readStudentData(const string& filename) {
 
     while (getline(infile, line)) {
         istringstream ss(line);
-        string last_name, first_name;
+        string last_name, first_name, email;
 
-        if (getline(ss, last_name, ',') && getline(ss, first_name)) {
-            last_name.erase(0, last_name.find_first_not_of(" \t"));
-            last_name.erase(last_name.find_last_not_of(" \t") + 1);
-            first_name.erase(0, first_name.find_first_not_of(" \t"));
-            first_name.erase(first_name.find_last_not_of(" \t") + 1);
+        if (includeEmails) {
+            if (getline(ss, last_name, ',') && getline(ss, first_name, ',') && getline(ss, email)) {
+                last_name.erase(0, last_name.find_first_not_of(" \t"));
+                last_name.erase(last_name.find_last_not_of(" \t") + 1);
+                first_name.erase(0, first_name.find_first_not_of(" \t"));
+                first_name.erase(first_name.find_last_not_of(" \t") + 1);
+                email.erase(0, email.find_first_not_of(" \t"));
+                email.erase(email.find_last_not_of(" \t") + 1);
 
-            students.push_back({ first_name, last_name });
+                students.push_back({ first_name, last_name, email });
+            }
+        }
+        else {
+            if (getline(ss, last_name, ',') && getline(ss, first_name)) {
+                last_name.erase(0, last_name.find_first_not_of(" \t"));
+                last_name.erase(last_name.find_last_not_of(" \t") + 1);
+                first_name.erase(0, first_name.find_first_not_of(" \t"));
+                first_name.erase(first_name.find_last_not_of(" \t") + 1);
+
+                students.push_back({ first_name, last_name, "" });
+            }
         }
     }
 
@@ -41,15 +56,32 @@ vector<STUDENT_DATA> readStudentData(const string& filename) {
 }
 
 int main() {
-    string filename = "StudentData.txt";
+    string filename;
 
-    vector<STUDENT_DATA> students = readStudentData(filename);
+#ifdef PRE_RELEASE
+    cout << "Running Pre-Release version..." << endl;
+    filename = "StudentData_Emails.txt";
+#else
+    cout << "Running Standard version..." << endl;
+    filename = "StudentData.txt";
+#endif
 
-    // Debug mode: Print all the student data if compiled with the DEBUG flag
+    bool includeEmails = false;
+
+#ifdef PRE_RELEASE
+    includeEmails = true;
+#endif
+
+    vector<STUDENT_DATA> students = readStudentData(filename, includeEmails);
+
 #ifdef _DEBUG
     cout << "Debug Mode: Printing student data..." << endl;
     for (const auto& student : students) {
-        cout << "First Name: " << student.first_name << ", Last Name: " << student.last_name << endl;
+        cout << "First Name: " << student.first_name << ", Last Name: " << student.last_name;
+        if (includeEmails) {
+            cout << ", Email: " << student.email;
+        }
+        cout << endl;
     }
 #endif
 
